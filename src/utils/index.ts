@@ -1,18 +1,3 @@
-/* Copyright (c) 2022, VRAI Labs and/or its affiliates. All rights reserved.
- *
- * This software is licensed under the Apache License, Version 2.0 (the
- * "License") as published by the Apache Software Foundation.
- *
- * You may not use this file except in compliance with the License. You may
- * obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
- */
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { FactorIds, HTTPStatusCodes, StorageKeys } from "../constants";
@@ -24,15 +9,15 @@ import { UserRecipeType } from "../ui/pages/usersList/types";
 import { ForbiddenError } from "./customErrors";
 
 export function getStaticBasePath(): string {
-	return (window as any).staticBasePath;
+	return process.env.REACT_APP_STATIC_BASE_PATH || "/assets";
 }
 
 export function getDashboardAppBasePath(): string {
-	return (window as any).dashboardAppPath;
+	return process.env.REACT_APP_DASHBOARD_APP_PATH || "/auth/dashboard";
 }
 
 export function isSearchEnabled(): boolean {
-	const searchFlag = (window as any).isSearchEnabled;
+	const searchFlag = process.env.REACT_APP_IS_SEARCH_ENABLED || true;
 
 	if (searchFlag !== undefined) {
 		return searchFlag === "true";
@@ -42,7 +27,7 @@ export function isSearchEnabled(): boolean {
 }
 
 export function getImageUrl(imageName: string): string {
-	return getStaticBasePath() + "/media/" + imageName;
+	return getStaticBasePath() + "/" + imageName;
 }
 
 export function getApiUrl(path: string, tenantId?: string): string {
@@ -56,11 +41,11 @@ export function getApiUrl(path: string, tenantId?: string): string {
 		dashboardBasePathToUse = dashboardBasePathToUse.replace("/dashboard", `/${tenantId}/dashboard`);
 	}
 
-	return window.location.origin + dashboardBasePathToUse + path;
+	return process.env.REACT_APP_API_URL + dashboardBasePathToUse + path;
 }
 
 export function getConnectionUri() {
-	return (window as any).connectionURI;
+	return process.env.REACT_APP_CONNECTION_URI || "http://localhost:3567";
 }
 
 const DEMO_CONNECTION_URIS = ["try.supertokens.io", "try.supertokens.com"];
@@ -293,8 +278,11 @@ export const getRecipeNameFromid = (id: UserRecipeType): string => {
 };
 
 export const getAuthMode = (): "api-key" | "email-password" => {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	return (window as any).authMode; // for now, either "api-key" or "email-password"
+	const authMode = process.env.REACT_APP_AUTH_MODE;
+	if (authMode === "api-key" || authMode === "email-password") {
+		return authMode;
+	}
+	return "email-password";
 };
 
 export const setSelectedTenantId = (tenantId: string) => {
